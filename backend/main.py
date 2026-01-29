@@ -2,23 +2,25 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from ai_engine import generate_reply
+
 app = FastAPI(
     title="BCABuddy Backend",
     description="Backend API for BCABuddy – IGNOU BCA AI Study Assistant",
-    version="0.2.0"
+    version="0.3.0"
 )
 
-# CORS (frontend connect ke liye)
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # later restrict karenge
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # -------------------------
-# Data Models (API Contract)
+# Data Models
 # -------------------------
 
 class ChatRequest(BaseModel):
@@ -34,7 +36,7 @@ class ChatResponse(BaseModel):
 
 
 # -------------------------
-# Basic Routes
+# Routes
 # -------------------------
 
 @app.get("/")
@@ -53,25 +55,16 @@ def health_check():
     }
 
 
-# -------------------------
-# Chat Endpoint (Skeleton)
-# -------------------------
-
 @app.post("/chat", response_model=ChatResponse)
 def chat_endpoint(payload: ChatRequest):
-    """
-    This is a placeholder chat endpoint.
-    AI + RAG logic will be plugged in later.
-    """
-
-    dummy_reply = (
-        "Abhi main warm-up mode me hoon 😄\n"
-        "AI aur IGNOU content thodi der me add hoga.\n"
-        "Par tension mat le — structure ready hai."
+    reply = generate_reply(
+        message=payload.message,
+        mode=payload.mode,
+        language=payload.language
     )
 
     return ChatResponse(
-        reply=dummy_reply,
+        reply=reply,
         mode=payload.mode,
         language=payload.language
     )
